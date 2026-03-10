@@ -1,0 +1,51 @@
+.chat-shell {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  height: calc(100vh - var(--topbar-h) - 48px);
+  max-height: 800px;
+}
+.chat-messages {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  padding-bottom: var(--gap);
+}
+.chat-bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+.chat-bubble.user {
+  align-self: flex-end;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.chat-bubble.assistant {
+  align-self: flex-start;
+  background: rgba(0, 255, 136, 0.06);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+}
+.chat-input-row {
+  display: flex;
+  gap: var(--gap-sm);
+  padding-top: var(--gap);
+  border-top: 1px solid var(--border);
+}
+.chat-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  resize: none;
+}
+.chat-input:focus { outline: none; border-color: var(--accent); }
+
+@keyframes blink { 50% { opacity: 0; } }
+.cursor { animation: blink 1s step-end infinite; color: var(--accent); }
