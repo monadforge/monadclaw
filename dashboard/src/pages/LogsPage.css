@@ -1,0 +1,39 @@
+.logs-toolbar {
+  display: flex;
+  gap: var(--gap-sm);
+  margin-bottom: var(--gap);
+  align-items: center;
+}
+.logs-search {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+.logs-search:focus { outline: none; border-color: var(--accent); }
+
+.log-list {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.log-entry {
+  display: grid;
+  grid-template-columns: 180px 60px 1fr;
+  gap: var(--gap-sm);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+.log-entry:hover { background: var(--surface); }
+.log-entry[data-level="DEBUG"] { color: var(--text-muted); }
+.log-entry[data-level="INFO"]  { color: var(--text); }
+.log-entry[data-level="WARN"]  { color: var(--warning); }
+.log-entry[data-level="ERROR"] { color: var(--error); }
+.log-time { color: var(--text-muted); }
+.log-level { font-weight: 500; }
