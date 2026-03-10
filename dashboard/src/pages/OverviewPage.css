@@ -1,0 +1,18 @@
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--gap);
+  margin-bottom: var(--gap-lg);
+}
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xl);
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
