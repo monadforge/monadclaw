@@ -1,0 +1,43 @@
+:root {
+  /* Colors */
+  --bg:            #0a0a0a;
+  --surface:       #111111;
+  --surface-2:     #1a1a1a;
+  --border:        #2a2a2a;
+  --accent:        #00ff88;
+  --accent-dim:    #00cc6a;
+  --text:          #e2e8f0;
+  --text-muted:    #4a5568;
+
+  /* Semantic */
+  --success:       #00ff88;
+  --warning:       #f59e0b;
+  --error:         #ef4444;
+  --info:          #22d3ee;
+
+  /* Typography */
+  --font-mono:     'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans:     'Inter', system-ui, sans-serif;
+  --font-size-xs:  11px;
+  --font-size-sm:  13px;
+  --font-size-base: 14px;
+  --font-size-lg:  16px;
+  --font-size-xl:  20px;
+
+  /* Spacing */
+  --radius-sm:     4px;
+  --radius:        8px;
+  --radius-lg:     12px;
+  --gap-sm:        8px;
+  --gap:           16px;
+  --gap-lg:        24px;
+
+  /* Layout */
+  --sidebar-w:     220px;
+  --sidebar-collapsed-w: 56px;
+  --topbar-h:      56px;
+
+  /* Motion */
+  --fast:          120ms ease-out;
+  --normal:        200ms ease-in-out;
+}
