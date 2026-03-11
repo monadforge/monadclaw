@@ -1,0 +1,11 @@
+[package]
+edition.workspace = true
+name              = "monadclaw-chat"
+version.workspace = true
+
+[dependencies]
+serde      = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true
