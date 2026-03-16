@@ -14,11 +14,17 @@ Monadclaw is a modular AI agent framework written in Rust. Features: Discord bot
 - Frontend conventions (React dashboard): @docs/frontend.md
 - Security rules: @docs/security.md
 - Website (VitePress): `web/` — `cd web && npm run dev`
+- Local rules (not committed): @docs/local.md
 
 ## Build Commands
 
 ```bash
-# Build the project
+# Dashboard (React + Vite) — cd dashboard first
+npm run dev        # dev server at http://localhost:5173
+npm run build      # production build → dashboard/dist/
+npm run typecheck  # TypeScript check
+
+# Rust backend
 cargo build
 
 # Build release version

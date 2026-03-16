@@ -33,14 +33,17 @@ mod tests {
             ProviderConfig {
                 model: "gpt-4o".to_string(),
                 api_key_env: "OPENAI_API_KEY".to_string(),
+                base_url: None,
             },
         );
         AppState {
             config: Arc::new(Config {
                 active_provider: "openai".to_string(),
                 providers,
+                dashboard_password: None,
             }),
             api_key: Arc::new("sk-test".to_string()),
+            dashboard_password: None,
         }
     }
 

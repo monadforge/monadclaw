@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import type { ChatMessage } from '../types/api'
+import { useAuthStore } from '../store/authStore'
 
 let _idCounter = 0
 const nextId = () => String(++_idCounter)
@@ -31,9 +32,13 @@ export function useChat() {
         messages: [...messages, userMsg].map(({ role, content }) => ({ role, content })),
       }
 
+      const token = useAuthStore.getState().token
       fetch('/api/v1/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(payload),
       })
         .then(response => {

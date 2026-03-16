@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{net::SocketAddr, sync::Arc};
 
 use monadclaw_api::state::AppState;
 use monadclaw_config::Config;
@@ -35,6 +35,7 @@ async fn main() -> anyhow::Result<()> {
     })?;
 
     let state = AppState {
+        dashboard_password: config.dashboard_password.clone().map(Arc::new),
         config: Arc::new(config),
         api_key: Arc::new(api_key),
     };
@@ -46,11 +47,11 @@ async fn main() -> anyhow::Result<()> {
 
     let app = monadclaw_api::router(state).layer(cors);
 
-    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], 3000));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
     info!(%addr, "starting server");
 
     let listener = tokio::net::TcpListener::bind(addr).await?;
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>()).await?;
 
     Ok(())
 }

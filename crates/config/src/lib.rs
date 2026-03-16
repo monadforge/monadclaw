@@ -24,6 +24,9 @@ pub struct ProviderConfig {
     pub model: String,
     /// Name of the environment variable holding the API key.
     pub api_key_env: String,
+    /// Optional base URL for OpenAI-compatible custom endpoints (e.g. OpenRouter: https://openrouter.ai/api/v1/).
+    /// When set, the provider is treated as an OpenAI-compatible API at this endpoint.
+    pub base_url: Option<String>,
 }
 
 /// Top-level config shape, maps to `~/.config/monadclaw/config.toml`.
@@ -34,6 +37,10 @@ pub struct Config {
     /// Map of provider name → provider settings.
     #[serde(default)]
     pub providers: HashMap<String, ProviderConfig>,
+    /// Optional dashboard password. When set, all API requests must supply it as a Bearer token.
+    /// When absent, local (loopback) connections are allowed without auth; remote connections get 403.
+    #[serde(default)]
+    pub dashboard_password: Option<String>,
 }
 
 impl Config {

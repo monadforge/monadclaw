@@ -31,15 +31,39 @@ fn to_genai_messages(messages: &[ChatMessage]) -> Vec<genai::chat::ChatMessage> 
 }
 
 /// Build a `genai::Client` with an explicit API key.
-fn build_client(api_key: &str) -> genai::Client {
+///
+/// When `base_url` is provided the client is configured as an OpenAI-compatible
+/// endpoint at that URL (e.g. Kimi at `https://api.moonshot.cn/v1`).
+fn build_client(api_key: &str, base_url: Option<&str>) -> genai::Client {
     let key = api_key.to_string();
-    genai::Client::builder()
-        .with_auth_resolver(genai::resolver::AuthResolver::from_resolver_fn(
-            move |_model_iden| {
-                Ok(Some(genai::resolver::AuthData::from_single(key.clone())))
-            },
-        ))
-        .build()
+
+    if let Some(url) = base_url {
+        let url = url.to_string();
+        genai::Client::builder()
+            .with_service_target_resolver(
+                genai::resolver::ServiceTargetResolver::from_resolver_fn(
+                    move |service_target: genai::ServiceTarget| {
+                        Ok(genai::ServiceTarget {
+                            endpoint: genai::resolver::Endpoint::from_owned(url.clone()),
+                            auth: genai::resolver::AuthData::from_single(key.clone()),
+                            model: genai::ModelIden::new(
+                                genai::adapter::AdapterKind::OpenAI,
+                                service_target.model.model_name,
+                            ),
+                        })
+                    },
+                ),
+            )
+            .build()
+    } else {
+        genai::Client::builder()
+            .with_auth_resolver(genai::resolver::AuthResolver::from_resolver_fn(
+                move |_model_iden| {
+                    Ok(Some(genai::resolver::AuthData::from_single(key.clone())))
+                },
+            ))
+            .build()
+    }
 }
 
 /// Stream chat completions from the configured provider.
@@ -53,7 +77,7 @@ pub fn stream_chat(
     messages: Vec<ChatMessage>,
 ) -> Pin<Box<dyn Stream<Item = StreamEvent> + Send>> {
     let model = config.model.clone();
-    let client = build_client(&api_key);
+    let client = build_client(&api_key, config.base_url.as_deref());
 
     Box::pin(async_stream::stream! {
         use genai::chat::ChatStreamEvent;
