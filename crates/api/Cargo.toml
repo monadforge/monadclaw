@@ -7,6 +7,7 @@ version.workspace = true
 anyhow              = { workspace = true }
 axum                = { workspace = true }
 futures             = { workspace = true }
+monadclaw-agent     = { workspace = true }
 monadclaw-chat      = { workspace = true }
 monadclaw-config    = { workspace = true }
 monadclaw-providers = { workspace = true }

@@ -416,6 +416,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "dirs"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3e8aa94d75141228480295a7d0e7feb620b1a5ad9f12bc40be62411e38cce4e"
+dependencies = [
+ "dirs-sys",
+]
+
+[[package]]
 name = "dirs-sys"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1235,6 +1244,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "monadclaw-agent"
+version = "0.1.0"
+dependencies = [
+ "async-stream",
+ "futures",
+ "monadclaw-chat",
+ "monadclaw-providers",
+ "tempfile",
+ "thiserror 2.0.18",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+]
+
+[[package]]
 name = "monadclaw-api"
 version = "0.1.0"
 dependencies = [
@@ -1242,6 +1266,7 @@ dependencies = [
  "axum",
  "axum-test",
  "futures",
+ "monadclaw-agent",
  "monadclaw-chat",
  "monadclaw-config",
  "monadclaw-providers",
@@ -1267,6 +1292,7 @@ version = "0.1.0"
 dependencies = [
  "directories",
  "serde",
+ "shellexpand",
  "tempfile",
  "thiserror 2.0.18",
  "toml",
@@ -1292,8 +1318,10 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum",
+ "monadclaw-agent",
  "monadclaw-api",
  "monadclaw-config",
+ "monadclaw-providers",
  "tokio",
  "tower-http",
  "tracing",
@@ -2088,6 +2116,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f40ca3c46823713e0d4209592e8d6e826aa57e928f09752619fc696c499637f6"
 dependencies = [
  "lazy_static",
+]
+
+[[package]]
+name = "shellexpand"
+version = "3.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32824fab5e16e6c4d86dc1ba84489390419a39f97699852b66480bb87d297ed8"
+dependencies = [
+ "dirs",
 ]
 
 [[package]]

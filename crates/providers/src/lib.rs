@@ -1,23 +1,90 @@
-use std::pin::Pin;
+use std::{pin::Pin, sync::Arc};
 
 use futures::StreamExt;
 use monadclaw_chat::ChatMessage;
 use monadclaw_config::ProviderConfig;
 use tokio_stream::Stream;
-use tracing::{debug, instrument};
+use tracing::debug;
 
-/// A single streaming event from the LLM.
+/// A streaming event from an LLM provider.
 #[derive(Debug, Clone)]
-pub enum StreamEvent {
+pub enum ProviderEvent {
     /// A text delta (token chunk).
     Delta(String),
     /// Stream finished normally.
     Done,
-    /// An error occurred; stream will not produce more events.
+    /// An error occurred; no further events will be produced.
     Error(String),
 }
 
-/// Convert our `ChatMessage` types to genai's format.
+/// Trait implemented by every LLM provider backend.
+pub trait Provider: Send + Sync {
+    /// Stream a chat completion from the given message history.
+    fn stream(
+        &self,
+        messages: Vec<ChatMessage>,
+    ) -> Pin<Box<dyn Stream<Item = ProviderEvent> + Send>>;
+}
+
+/// LLM provider backed by the `genai` crate (OpenAI-compatible + Anthropic).
+pub struct GenaiProvider {
+    model: String,
+    client: Arc<genai::Client>,
+}
+
+impl GenaiProvider {
+    /// Construct a provider from config and a resolved API key.
+    pub fn new(config: &ProviderConfig, api_key: &str) -> Self {
+        Self {
+            model: config.model.clone(),
+            client: Arc::new(build_client(api_key, config.base_url.as_deref())),
+        }
+    }
+}
+
+impl Provider for GenaiProvider {
+    fn stream(&self, messages: Vec<ChatMessage>) -> Pin<Box<dyn Stream<Item = ProviderEvent> + Send>> {
+        let model = self.model.clone();
+        let client = Arc::clone(&self.client);
+
+        Box::pin(async_stream::stream! {
+            use genai::chat::ChatStreamEvent;
+
+            debug!(model = %model, "starting chat stream");
+
+            let genai_messages = to_genai_messages(&messages);
+            let chat_req = genai::chat::ChatRequest::new(genai_messages);
+
+            let mut chat_stream = match client.exec_chat_stream(&model, chat_req, None).await {
+                Ok(s) => s,
+                Err(e) => {
+                    yield ProviderEvent::Error(format!("{e}"));
+                    return;
+                }
+            };
+
+            while let Some(result) = chat_stream.stream.next().await {
+                match result {
+                    Ok(ChatStreamEvent::Chunk(chunk)) if !chunk.content.is_empty() => {
+                        yield ProviderEvent::Delta(chunk.content);
+                    }
+                    Ok(ChatStreamEvent::End(_)) => {
+                        yield ProviderEvent::Done;
+                        return;
+                    }
+                    Ok(_) => {}
+                    Err(e) => {
+                        yield ProviderEvent::Error(format!("{e}"));
+                        return;
+                    }
+                }
+            }
+
+            yield ProviderEvent::Done;
+        })
+    }
+}
+
 fn to_genai_messages(messages: &[ChatMessage]) -> Vec<genai::chat::ChatMessage> {
     use monadclaw_chat::Role;
     messages
@@ -30,10 +97,10 @@ fn to_genai_messages(messages: &[ChatMessage]) -> Vec<genai::chat::ChatMessage> 
         .collect()
 }
 
-/// Build a `genai::Client` with an explicit API key.
+/// Build a `genai::Client` configured with the given API key and optional base URL.
 ///
 /// When `base_url` is provided the client is configured as an OpenAI-compatible
-/// endpoint at that URL (e.g. Kimi at `https://api.moonshot.cn/v1`).
+/// endpoint (e.g. OpenRouter at `https://openrouter.ai/api/v1/`).
 fn build_client(api_key: &str, base_url: Option<&str>) -> genai::Client {
     let key = api_key.to_string();
 
@@ -64,54 +131,4 @@ fn build_client(api_key: &str, base_url: Option<&str>) -> genai::Client {
             ))
             .build()
     }
-}
-
-/// Stream chat completions from the configured provider.
-///
-/// `api_key` is the resolved value of the env var named in `config.api_key_env`.
-/// It is passed explicitly so the server can resolve it once at startup.
-#[instrument(skip(messages, api_key))]
-pub fn stream_chat(
-    config: &ProviderConfig,
-    api_key: String,
-    messages: Vec<ChatMessage>,
-) -> Pin<Box<dyn Stream<Item = StreamEvent> + Send>> {
-    let model = config.model.clone();
-    let client = build_client(&api_key, config.base_url.as_deref());
-
-    Box::pin(async_stream::stream! {
-        use genai::chat::ChatStreamEvent;
-
-        debug!(model = %model, "starting chat stream");
-
-        let genai_messages = to_genai_messages(&messages);
-        let chat_req = genai::chat::ChatRequest::new(genai_messages);
-
-        let mut chat_stream = match client.exec_chat_stream(&model, chat_req, None).await {
-            Ok(s) => s,
-            Err(e) => {
-                yield StreamEvent::Error(format!("{e}"));
-                return;
-            }
-        };
-
-        while let Some(result) = chat_stream.stream.next().await {
-            match result {
-                Ok(ChatStreamEvent::Chunk(chunk)) if !chunk.content.is_empty() => {
-                    yield StreamEvent::Delta(chunk.content);
-                }
-                Ok(ChatStreamEvent::End(_)) => {
-                    yield StreamEvent::Done;
-                    return;
-                }
-                Ok(_) => {}
-                Err(e) => {
-                    yield StreamEvent::Error(format!("{e}"));
-                    return;
-                }
-            }
-        }
-
-        yield StreamEvent::Done;
-    })
 }

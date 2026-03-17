@@ -1,6 +1,7 @@
 [workspace]
 members = [
   "apps/server",
+  "crates/agent",
   "crates/api",
   "crates/chat",
   "crates/config",
@@ -45,8 +46,10 @@ futures      = "0.3"
 tokio-stream = "0.1"
 # Filesystem
 directories = "6"
+shellexpand = "3"
 
 # Workspace crates
+monadclaw-agent     = { path = "crates/agent" }
 monadclaw-api       = { path = "crates/api" }
 monadclaw-chat      = { path = "crates/chat" }
 monadclaw-config    = { path = "crates/config" }

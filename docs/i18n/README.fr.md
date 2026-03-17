@@ -78,7 +78,7 @@ Le dashboard affichera une page de connexion. Le token est stocké dans `localSt
 L'accès distant est **bloqué par défaut** en l'absence de mot de passe — mesure de sécurité intentionnelle.
 Pour l'activer, définir `dashboard_password` dans la configuration.
 
-> Voir [docs/auth.md](../auth.md) pour la politique d'authentification complète.
+> Voir [docs/features/auth.md](../features/auth.md) pour la politique d'authentification complète.
 
 ---
 
@@ -88,10 +88,11 @@ Pour l'activer, définir `dashboard_password` dans la configuration.
 monadclaw/
 ├── apps/server/        # Point d'entrée binaire (serveur HTTP Axum)
 ├── crates/
+│   ├── agent/          # Session agent — état de conversation, exécution des tours
 │   ├── api/            # Routeur Axum, routes, middleware
 │   ├── chat/           # Types de messages de chat
 │   ├── config/         # Chargement de la configuration TOML
-│   └── providers/      # Abstraction des fournisseurs LLM (genai)
+│   └── providers/      # Trait Provider LLM + backend genai
 ├── dashboard/          # Dashboard React 19 + TypeScript
 ├── docs/               # Spécifications et documentation internes
 └── config.toml         # Configuration locale (ignorée par git)
@@ -104,7 +105,7 @@ monadclaw/
 | Fonctionnalité | État |
 |---------------|------|
 | Chargement config TOML + résolution variables d'environnement | ✅ Terminé |
-| Abstraction fournisseurs LLM (genai) | ✅ Terminé |
+| Trait Provider LLM + backend genai (compatible OpenAI) | ✅ Terminé |
 | Endpoints compatibles OpenAI (OpenRouter, Kimi, etc.) | ✅ Terminé |
 | API chat en streaming (`POST /api/v1/chat`) | ✅ Terminé |
 | API statut (`GET /api/v1/status`) | ✅ Terminé |
@@ -113,13 +114,16 @@ monadclaw/
 | Page chat avec réponses en streaming | ✅ Terminé |
 | Middleware d'authentification trois niveaux | ✅ Terminé |
 | Page de connexion + garde de route | ✅ Terminé |
-| Boucle agent (appels d'outils, raisonnement multi-étapes) | 🔄 Prévu |
-| Mémoire court terme (fenêtre de conversation) | 🔄 Prévu |
-| Mémoire long terme (stockage persistant) | 🔄 Prévu |
+| Session agent — état de conversation, historique, prompt système | ✅ Terminé |
+| Exécution de tours avec état (`begin_turn` / `commit`) | ✅ Terminé |
+| Workspace agent (SOUL.md, IDENTITY.md, MEMORY.md, flux bootstrap) | ✅ Terminé |
+| Appels d'outils (function calling) | 🔨 En cours |
+| Mémoire court terme (persistance session côté serveur) | 🔨 En cours |
 | Interface bot Discord | 🔄 Prévu |
+| Mémoire long terme (stockage persistant) | 🔄 Prévu |
 | Fournisseurs LLM multiples (Anthropic, Gemini, etc.) | 🔄 Prévu |
 | Éditeur de configuration dans le dashboard | 🔄 Prévu |
-| Historique des sessions | 🔄 Prévu |
+| Historique des sessions dans le dashboard | 🔄 Prévu |
 | Suivi d'utilisation | 🔄 Prévu |
 | Visualiseur de logs | 🔄 Prévu |
 | Tâches planifiées (cron) | 🔄 Prévu |

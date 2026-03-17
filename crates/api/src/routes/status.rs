@@ -18,13 +18,27 @@ pub async fn get_status(State(state): State<AppState>) -> Json<Value> {
 #[cfg(test)]
 #[allow(clippy::unwrap_used)]
 mod tests {
-    use std::{collections::HashMap, sync::Arc};
+    use std::{collections::HashMap, pin::Pin, sync::Arc};
 
     use axum::http::StatusCode;
     use axum_test::{TestResponse, TestServer};
+    use monadclaw_chat::ChatMessage;
     use monadclaw_config::{Config, ProviderConfig};
+    use monadclaw_providers::{Provider, ProviderEvent};
+    use tokio_stream::Stream;
 
     use crate::{router, state::AppState};
+
+    struct StubProvider;
+
+    impl Provider for StubProvider {
+        fn stream(
+            &self,
+            _messages: Vec<ChatMessage>,
+        ) -> Pin<Box<dyn Stream<Item = ProviderEvent> + Send>> {
+            Box::pin(tokio_stream::empty())
+        }
+    }
 
     fn test_state() -> AppState {
         let mut providers = HashMap::new();
@@ -41,8 +55,10 @@ mod tests {
                 active_provider: "openai".to_string(),
                 providers,
                 dashboard_password: None,
+                workspace_path: None,
             }),
-            api_key: Arc::new("sk-test".to_string()),
+            provider: Arc::new(StubProvider),
+            workspace_context: Arc::new(String::new()),
             dashboard_password: None,
         }
     }
